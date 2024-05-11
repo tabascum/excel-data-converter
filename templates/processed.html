@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='styles/styles.css')}}">
+    <title>File Processed</title>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <h1>File Processed Successfully</h1>
+        </header>
+
+        <section>
+            <p>The file has been processed successfully.</p>
+            <a href="{{ download_url }}" download><button>Download Processed File</button></a>
+            <a href="{{ url_for('homepage') }}"><button>Return to Homepage</button></a>
+        </section>
+
+        <footer>All rights reserved</footer>
+    </main>
+</body>
+
+</html>

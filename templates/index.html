@@ -1,0 +1,35 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <title>Excel Data Manipulation</title>
+</head>
+
+<body>
+    <main class="container">
+
+        <header>
+            <h1>Excel Data Converter</h1>
+        </header>
+
+        <section>
+            <form id="uploadForm" enctype="multipart/form-data" action="{{ url_for('upload') }}" method="post">
+                <label for="inputfile">
+                    <input type="file" name="file" id="file" class="inputfile" multiple>
+                </label>
+                <button type="submit">Process</button>
+            </form>
+        </section>
+
+        <footer>All rights reserved</footer>
+
+    </main>
+
+    <script src="{{ url_for('static', filename='js/inputs.js') }}"></script>
+</body>
+
+</html>
