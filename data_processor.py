@@ -148,11 +148,11 @@ def process_excel(file_path, download_directory):
             # Construct the new promotion name
             new_promotion_name = f"{prefix} MM {customer_suffix}".strip()
             if promotion_number:
-                return f"{new_promotion_name} - {promotion_number} - E"
+                return f"{new_promotion_name} - {promotion_number} - NP - E"
             else:
-                return f"{new_promotion_name} - E"
+                return f"{new_promotion_name} - NP - E"
         else:
-            return f"{promotion_name} - E"
+            return f"{promotion_name} - NP - E"
 
 
     df['Sales PGM Name(Editable)'] = df.apply(lambda row: transform_promotion_name(row['Promotion Name'], row['Customer Name']), axis=1)
