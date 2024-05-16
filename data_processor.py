@@ -128,31 +128,25 @@ def process_excel(file_path, download_directory):
         promotion_name = str(promotion_name)
         customer_name = str(customer_name)
 
-        # Extract the program number
-        promotion_number = re.search(r'\b[A-Za-z]{2}\d{4,5}\b', promotion_name)
-        promotion_number = promotion_number.group() if promotion_number else ""
+        # Extract the program number and other suffix components
+        """ suffix_match = re.search(r'(\s-\s[^\s]+)', promotion_name)
+        suffix = suffix_match.group(1) if suffix_match else "" """
 
-        # Check if the customer is MEDIAMARKT
-        if "MEDIAMARKT" in customer_name:
-            # Replace 'MEDIAMARKT' with 'MM'
-            customer_name = customer_name.replace('MEDIAMARKT', 'MM')
-            
-            # Extract any prefix from promotion_name
-            prefix_match = re.search(r'^.*?(?=\sMM|\sMEDIAMARKT)', promotion_name)
-            prefix = prefix_match.group() if prefix_match else promotion_name.rstrip()
+        # Extract the rest of the promotion name (prefix)
+        prefix_match = re.search(r'^(.*?)\s-', promotion_name)
+        prefix = prefix_match.group(1).strip() if prefix_match else promotion_name.strip()
 
-            # Extract the customer suffix after 'MEDIAMARKT'
-            parts = customer_name.split('MM')
-            customer_suffix = parts[-1].strip() if len(parts) > 1 else ""
-
-            # Construct the new promotion name
-            new_promotion_name = f"{prefix} MM {customer_suffix}".strip()
-            if promotion_number:
-                return f"{new_promotion_name} - {promotion_number} - NP - E"
-            else:
-                return f"{new_promotion_name} - NP - E"
+        # Replace 'MEDIAMARKT' with the actual customer name
+        if "MEDIAMARKT" in promotion_name:
+            new_promotion_name = promotion_name.replace('MEDIAMARKT', customer_name)
         else:
-            return f"{promotion_name} - NP - E"
+            new_promotion_name = promotion_name
+
+        # Ensure the suffix (program number) is added correctly
+        """ if suffix:
+            new_promotion_name = f"{new_promotion_name} {suffix}".strip() """
+
+        return f"{new_promotion_name} - NP - E"
 
 
     df['Sales PGM Name(Editable)'] = df.apply(lambda row: transform_promotion_name(row['Promotion Name'], row['Customer Name']), axis=1)
