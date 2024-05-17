@@ -138,7 +138,7 @@ def process_excel(file_path, download_directory):
         return f"{new_promotion_name} - NP - E"
 
     df['Sales PGM Name(Editable)'] = df.apply(lambda row: transform_promotion_name(row['Promotion Name'], row['Customer Name']), axis=1)
-    df['Registration Requeste Date(Editable)'] = datetime.now().strftime("%Y%m%d")
+    df['Registration Request Date(Editable)'] = datetime.now().strftime("%Y%m%d")
     df['Accounting Unit(Editable)'] = 'SAL'
     df['Department(Editable)'] = 20066
     df['Apply Month(Editable)'] = df['Apply Date(To)'].dt.strftime('%Y%m')
