@@ -10,8 +10,8 @@ def distribute_qty(df):
 
     saturn_rows = df[df['Customer Name'].str.contains('MEDIAMARKT SATURN')]
     for index, row in saturn_rows.iterrows():
-        if pd.notna(row['Model']) and pd.notna(row['Promotion Name']):
-            matching_rows = df[(df['Model'] == row['Model']) & 
+        if pd.notna(row['Model(Editable)']) and pd.notna(row['Promotion Name']):
+            matching_rows = df[(df['Model(Editable)'] == row['Model(Editable)']) & 
                                (df['Promotion Name'] == row['Promotion Name']) &
                                (~df['Customer Name'].str.contains('MEDIAMARKT SATURN'))]
 
@@ -87,7 +87,7 @@ def consolidate_duplicate_models(df):
     non_mediamarkt_df = df[~df['Customer Name'].str.contains('MEDIAMARKT', na=False)]
 
     # Group by Model, Promotion Name, and year of Apply Date(From) and Apply Date(To)
-    grouped = non_mediamarkt_df.groupby(['Model', 'Promotion Name', 'Year_From', 'Year_To'])
+    grouped = non_mediamarkt_df.groupby(['Model(Editable)', 'Promotion Name', 'Year_From', 'Year_To'])
 
     for _, group in grouped:
         if len(group) > 1:
