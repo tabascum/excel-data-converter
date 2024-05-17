@@ -127,25 +127,20 @@ def process_excel(file_path, download_directory):
         # Convert both promotion_name and customer_name to strings
         promotion_name = str(promotion_name)
         customer_name = str(customer_name)
-
-        # Extract the program number and other suffix components
-        """ suffix_match = re.search(r'(\s-\s[^\s]+)', promotion_name)
-        suffix = suffix_match.group(1) if suffix_match else "" """
-
+        
         # Extract the rest of the promotion name (prefix)
         prefix_match = re.search(r'^(.*?)\s-', promotion_name)
         prefix = prefix_match.group(1).strip() if prefix_match else promotion_name.strip()
-
-        # Replace 'MEDIAMARKT' with the actual customer name
+        
+        # Extract suffix from the customer name (if any)
+        customer_suffix = customer_name.replace('MEDIAMARKT', '').strip()
+        
+        # Replace 'MEDIAMARKT' with 'MM' and append customer suffix if applicable
         if "MEDIAMARKT" in promotion_name:
-            new_promotion_name = promotion_name.replace('MEDIAMARKT', customer_name)
+            new_promotion_name = promotion_name.replace('MEDIAMARKT', f'MM {customer_suffix}'.strip())
         else:
             new_promotion_name = promotion_name
-
-        # Ensure the suffix (program number) is added correctly
-        """ if suffix:
-            new_promotion_name = f"{new_promotion_name} {suffix}".strip() """
-
+        
         return f"{new_promotion_name} - NP - E"
 
 

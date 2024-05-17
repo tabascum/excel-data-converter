@@ -47,6 +47,6 @@ def download(filename):
     return send_file(os.path.join(DOWNLOAD_DIRECTORY, filename), as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
 
