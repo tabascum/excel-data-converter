@@ -4,7 +4,6 @@ import re
 import random
 from datetime import datetime
 
-
 def distribute_qty(df):
     df['Customer Name'] = df['Customer Name'].fillna('')
 
@@ -33,7 +32,6 @@ def distribute_qty(df):
 
     return df
 
-
 def distribute_evenly(df, total_qty, matching_rows, index):
     num_customers = len(matching_rows)
     qty_per_customer = total_qty // num_customers
@@ -47,14 +45,12 @@ def distribute_evenly(df, total_qty, matching_rows, index):
 
     df.at[index, 'Expected QTY(Editable)'] = 0
 
-
 def distribute_randomly(df, total_qty, matching_rows, index):
     for _ in range(total_qty):
         random_customer = random.choice(matching_rows.index)
         df.at[random_customer, 'Expected QTY(Editable)'] += 1
 
     df.at[index, 'Expected QTY(Editable)'] = 0
-
 
 def remove_randomly(df, total_qty_to_remove, matching_rows, saturn_index):
     while total_qty_to_remove > 0:
@@ -112,7 +108,6 @@ def consolidate_duplicate_models(df):
 
     return df
 
-
 def process_excel(file_path, download_directory):
     df = pd.read_excel(file_path)
 
@@ -121,7 +116,6 @@ def process_excel(file_path, download_directory):
 
     current_year = datetime.now().year
     current_month_year = datetime.now().strftime("%Y%m")
-
 
     def transform_promotion_name(promotion_name, customer_name):
         # Convert both promotion_name and customer_name to strings
@@ -143,24 +137,24 @@ def process_excel(file_path, download_directory):
         
         return f"{new_promotion_name} - NP - E"
 
-
     df['Sales PGM Name(Editable)'] = df.apply(lambda row: transform_promotion_name(row['Promotion Name'], row['Customer Name']), axis=1)
     df['Registration Requeste Date(Editable)'] = datetime.now().strftime("%Y%m%d")
     df['Accounting Unit(Editable)'] = 'SAL'
     df['Department(Editable)'] = 20066
-
     df['Apply Month(Editable)'] = df['Apply Date(To)'].dt.strftime('%Y%m')
 
     df = distribute_qty(df)
     df = consolidate_duplicate_models(df)
 
+    # Calculate 'Expected Cost(Editable)'
+    df['Expected Cost(Editable)'] = df['Amount per unit(Editable)'] * df['Expected QTY(Editable)']
+
+    # Maintain the original column order
+    original_columns = pd.read_excel(file_path, nrows=0).columns.tolist()
+    df = df[original_columns]
 
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     processed_file_name = f"processed_file_{timestamp}.xlsx"
     processed_file_path = os.path.join(download_directory, processed_file_name)
     df.to_excel(processed_file_path, index=False)
     return processed_file_path
-
-    
-
-
