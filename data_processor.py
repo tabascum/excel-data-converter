@@ -147,7 +147,7 @@ def process_excel(file_path, download_directory):
     df = consolidate_duplicate_models(df)
 
     # Calculate 'Expected Cost(Editable)'
-    df['Expected Cost(Editable)'] = df['Amount per unit(Editable)'] * df['Expected QTY(Editable)']
+    df['Expected Cost(Editable)'] = df['Amount Per Unit(Editable)'] * df['Expected QTY(Editable)']
 
     # Maintain the original column order
     original_columns = pd.read_excel(file_path, nrows=0).columns.tolist()
