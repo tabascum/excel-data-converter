@@ -141,13 +141,13 @@ def process_excel(file_path, download_directory):
     df['Registration Request Date(Editable)'] = datetime.now().strftime("%Y%m%d")
     df['Accounting Unit(Editable)'] = 'SAL'
     df['Department(Editable)'] = 20066
-    df['Apply Month(Editable)'] = df['Apply Date(To)'].dt.strftime('%Y%m')
+    df['Apply Month(Editable)'] = "202406"
 
     df = distribute_qty(df)
     df = consolidate_duplicate_models(df)
 
     # Calculate 'Expected Cost(Editable)'
-    df['Expected Cost(Editable)'] = df['Amount Per Unit(Editable)'] * df['Expected QTY(Editable)']
+    df['Expected Cost(Editable)'] = df['Amount Per Unit'] * df['Expected QTY(Editable)']
 
     # Maintain the original column order
     original_columns = pd.read_excel(file_path, nrows=0).columns.tolist()
@@ -158,3 +158,7 @@ def process_excel(file_path, download_directory):
     processed_file_path = os.path.join(download_directory, processed_file_name)
     df.to_excel(processed_file_path, index=False)
     return processed_file_path
+
+    
+
+
