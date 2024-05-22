@@ -1,1 +1,1 @@
-web: python data.py
+web: gunicorn -w 3 -k uvicorn.workers.UvicornWorker data.py:app

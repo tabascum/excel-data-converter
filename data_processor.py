@@ -82,29 +82,31 @@ def consolidate_duplicate_models(df):
     # Filter out MEDIAMARKT promotions
     non_mediamarkt_df = df[~df['Customer Name'].str.contains('MEDIAMARKT', na=False)]
 
-    # Group by Model, Promotion Name, and year of Apply Date(From) and Apply Date(To)
-    grouped = non_mediamarkt_df.groupby(['Model(Editable)', 'Promotion Name', 'Year_From', 'Year_To'])
+    # Group by Model, Promotion Name, Year_From, Year_To, and Amount Per Unit
+    grouped = non_mediamarkt_df.groupby(['Model(Editable)', 'Promotion Name', 'Year_From', 'Year_To', 'Amount Per Unit'])
 
     for _, group in grouped:
         if len(group) > 1:
-            # Sum the quantities
-            total_qty = group['Expected QTY(Editable)'].sum()
+            # Check if all Amount Per Unit values are the same in the group
+            if group['Amount Per Unit'].nunique() == 1:
+                # Sum the quantities
+                total_qty = group['Expected QTY(Editable)'].sum()
 
-            # Get index of the first row in the group
-            first_index = group.index[0]
+                # Get index of the first row in the group
+                first_index = group.index[0]
 
-            # Update the first row with the total quantity
-            df.at[first_index, 'Expected QTY(Editable)'] = total_qty
+                # Update the first row with the total quantity
+                df.at[first_index, 'Expected QTY(Editable)'] = total_qty
 
-            # Drop the other rows in the group
-            df = df.drop(group.index[1:])
+                # Drop the other rows in the group
+                df = df.drop(group.index[1:])
+            else:
+                # If Amount Per Unit values are different, keep the duplicates
+                pass
 
     # Convert 'Apply Date(From)' and 'Apply Date(To)' back to the format YYYYMMDD
     df['Apply Date(From)'] = df['Apply Date(From)'].dt.strftime('%Y%m%d')
     df['Apply Date(To)'] = df['Apply Date(To)'].dt.strftime('%Y%m%d')
-
-    # Remove temporary year columns
-    df.drop(columns=['Year_From', 'Year_To'], inplace=True)
 
     return df
 
@@ -121,20 +123,25 @@ def process_excel(file_path, download_directory):
         # Convert both promotion_name and customer_name to strings
         promotion_name = str(promotion_name)
         customer_name = str(customer_name)
-        
+
         # Extract the rest of the promotion name (prefix)
         prefix_match = re.search(r'^(.*?)\s-', promotion_name)
         prefix = prefix_match.group(1).strip() if prefix_match else promotion_name.strip()
-        
+
         # Extract suffix from the customer name (if any)
         customer_suffix = customer_name.replace('MEDIAMARKT', '').strip()
-        
+
         # Replace 'MEDIAMARKT' with 'MM' and append customer suffix if applicable
         if "MEDIAMARKT" in promotion_name:
-            new_promotion_name = promotion_name.replace('MEDIAMARKT', f'MM {customer_suffix}'.strip())
+            new_promotion_name = promotion_name.replace('MEDIAMARKT', f'MM {customer_suffix}').strip()
         else:
             new_promotion_name = promotion_name
-        
+
+        # Check if the promotion name contains "UPDATE" or "RECREATE"
+        if "UPDATE" in new_promotion_name or "RECREATE" in new_promotion_name:
+            # Remove "UPDATE" or "RECREATE" from the promotion name
+            new_promotion_name = re.sub(r'\s*- UPDATE\s*|\s*- RECREATE\s*', '', new_promotion_name, flags=re.IGNORECASE)
+
         return f"{new_promotion_name} - NP - E"
 
     df['Sales PGM Name(Editable)'] = df.apply(lambda row: transform_promotion_name(row['Promotion Name'], row['Customer Name']), axis=1)
