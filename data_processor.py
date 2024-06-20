@@ -80,10 +80,10 @@ def consolidate_duplicate_models(df):
     df['Year_To'] = df['Apply Date(To)'].dt.year
 
     # Filter out MEDIAMARKT promotions
-    non_mediamarkt_df = df[~df['Customer Name'].str.contains('MEDIAMARKT', na=False)]
+    # non_mediamarkt_df = df[~df['Customer Name'].str.contains('MEDIAMARKT', na=False)]
 
     # Group by Model, Promotion Name, Year_From, Year_To, and Amount Per Unit
-    grouped = non_mediamarkt_df.groupby(['Model(Editable)', 'Promotion Name', 'Year_From', 'Year_To', 'Amount Per Unit'])
+    grouped = df.groupby(['Model(Editable)', 'Promotion Name', 'Year_From', 'Year_To', 'Amount Per Unit'])
 
     for _, group in grouped:
         if len(group) > 1:
@@ -124,16 +124,20 @@ def process_excel(file_path, download_directory):
         promotion_name = str(promotion_name)
         customer_name = str(customer_name)
 
-        # Extract the rest of the promotion name (prefix)
-        prefix_match = re.search(r'^(.*?)\s-', promotion_name)
+        # Extract the prefix from the promotion name (e.g., "BG SO MM LEIRIA - Z02")
+        prefix_match = re.search(r'^(.*?)\s*- Z\d+', promotion_name)
         prefix = prefix_match.group(1).strip() if prefix_match else promotion_name.strip()
 
-        # Extract suffix from the customer name (if any)
-        customer_suffix = customer_name.replace('MEDIAMARKT', '').strip()
+        # Randomly select a customer name from MEDIAMARKT or MEDIA MARKT promotions
+        mediamarkt_customers = re.findall(r'\bMEDI[ ]?A?[ ]?MARKT\s\S+', customer_name)  # Match MEDIAMARKT or MEDIA MARKT
+        selected_customer_name = random.choice(mediamarkt_customers) if mediamarkt_customers else ''
 
-        # Replace 'MEDIAMARKT' with 'MM' and append customer suffix if applicable
-        if "MEDIAMARKT" in promotion_name:
-            new_promotion_name = promotion_name.replace('MEDIAMARKT', f'MM {customer_suffix}').strip()
+        # Replace 'MEDIAMARKT' or 'MEDIA MARKT' with 'MM' and append customer suffix if applicable
+        if "MEDIAMARKT" in promotion_name or "MEDIA MARKT" in promotion_name:
+            customer_suffix = selected_customer_name.replace('MEDIAMARKT', '').replace('MEDIA MARKT', '').strip()
+            # Remove any trailing comma after 'MEDIAMARKT' or 'MEDIA MARKT' in promotion_name
+            promotion_name = re.sub(r'(MEDIAMARKT|MEDIA MARKT),?', 'MM', promotion_name, flags=re.IGNORECASE).strip()
+            new_promotion_name = promotion_name.replace('MM', f'MM {customer_suffix}').strip()
         else:
             new_promotion_name = promotion_name
 
@@ -143,6 +147,8 @@ def process_excel(file_path, download_directory):
             new_promotion_name = re.sub(r'\s*- UPDATE\s*|\s*- RECREATE\s*', '', new_promotion_name, flags=re.IGNORECASE)
 
         return f"{new_promotion_name} - NP - E"
+
+
 
     df['Sales PGM Name(Editable)'] = df.apply(lambda row: transform_promotion_name(row['Promotion Name'], row['Customer Name']), axis=1)
     df['Registration Request Date(Editable)'] = datetime.now().strftime("%Y%m%d")
@@ -165,7 +171,3 @@ def process_excel(file_path, download_directory):
     processed_file_path = os.path.join(download_directory, processed_file_name)
     df.to_excel(processed_file_path, index=False)
     return processed_file_path
-
-    
-
-
